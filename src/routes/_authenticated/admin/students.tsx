@@ -125,7 +125,7 @@ function AdminStudents() {
                 <td className="p-2">
                   <p className="font-bold">{r.full_name || "بدون اسم"}</p>
                   <p dir="ltr" className="text-xs text-muted-foreground">
-                    {r.phone || r.email}
+                    {r.phone || "—"}
                   </p>
                 </td>
                 <td className="p-2">{r.grade || "-"}</td>
