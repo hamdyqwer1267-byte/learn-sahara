@@ -77,7 +77,10 @@ function AuthPage() {
       parent_phone: form.get("parent_phone") ?? "",
       grade: form.get("grade") ?? "",
     });
-    if (!parsed.success) return toast.error(parsed.error.issues[0]?.message ?? "بيانات غير صحيحة");
+    if (!parsed.success) {
+      toast.error(parsed.error.issues[0]?.message ?? "بيانات غير صحيحة");
+      return;
+    }
 
     setBusy(true);
     const { error } = await supabase.auth.signUp({
