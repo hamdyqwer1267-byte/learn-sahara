@@ -155,7 +155,7 @@ function AuthPage() {
                 </div>
                 <div className="space-y-2">
                   <Label>الصف الدراسي</Label>
-                  <Select name="grade" defaultValue={GRADES[2]}>
+                  <Select name="grade" defaultValue={GRADES[2] ?? ""}>
                     <SelectTrigger>
                       <SelectValue placeholder="اختر الصف" />
                     </SelectTrigger>
