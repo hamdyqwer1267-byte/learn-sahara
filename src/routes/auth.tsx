@@ -97,7 +97,10 @@ function AuthPage() {
       },
     });
     setBusy(false);
-    if (error) return toast.error(error.message.includes("already") ? "هذا البريد مسجل بالفعل" : "تعذّر إنشاء الحساب");
+    if (error) {
+      toast.error(error.message.includes("already") ? "هذا البريد مسجل بالفعل" : "تعذّر إنشاء الحساب");
+      return;
+    }
     toast.success("تم إنشاء الحساب! تفقد بريدك لتأكيد الحساب إذا لزم الأمر.");
   };
 
