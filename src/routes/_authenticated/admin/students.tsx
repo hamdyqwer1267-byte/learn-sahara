@@ -55,7 +55,7 @@ function AdminStudents() {
       .filter((p) => {
         const t = q.trim();
         if (!t) return true;
-        return `${p.full_name ?? ""} ${p.phone ?? ""} ${p.email ?? ""}`.includes(t);
+        return `${p.full_name ?? ""} ${p.phone ?? ""}`.includes(t);
       })
       .map((p) => {
         const prog = data.progress.filter((x) => x.user_id === p.id);
