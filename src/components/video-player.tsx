@@ -21,7 +21,18 @@ const isDirectFile = (url: string) => /\.(mp4|webm|ogg|m3u8)(\?|$)/i.test(url);
 
 export function VideoPlayer({ url, watermark, onHeartbeat }: Props) {
   const [seconds, setSeconds] = useState(0);
+  const [resolved, setResolved] = useState("");
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    void resolveMediaUrl(url).then((u) => {
+      if (active) setResolved(u);
+    });
+    return () => {
+      active = false;
+    };
+  }, [url]);
 
   useEffect(() => {
     timer.current = setInterval(() => {
@@ -36,13 +47,15 @@ export function VideoPlayer({ url, watermark, onHeartbeat }: Props) {
     };
   }, [onHeartbeat]);
 
-  if (!url) {
+  if (!resolved) {
     return (
       <div className="flex aspect-video items-center justify-center rounded-2xl bg-muted text-muted-foreground">
-        لم يتم رفع فيديو لهذا الدرس بعد
+        {url ? "جاري تجهيز الفيديو..." : "لم يتم رفع فيديو لهذا الدرس بعد"}
       </div>
     );
   }
+
+
 
   return (
     <div className="relative aspect-video overflow-hidden rounded-2xl bg-black shadow-soft">
