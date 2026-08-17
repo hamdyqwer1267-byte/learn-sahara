@@ -59,9 +59,9 @@ export function VideoPlayer({ url, watermark, onHeartbeat }: Props) {
 
   return (
     <div className="relative aspect-video overflow-hidden rounded-2xl bg-black shadow-soft">
-      {isDirectFile(url) ? (
+      {isDirectFile(resolved) || url.trim().startsWith("storage:") ? (
         <video
-          src={url}
+          src={resolved}
           controls
           controlsList="nodownload"
           onContextMenu={(e) => e.preventDefault()}
@@ -69,7 +69,8 @@ export function VideoPlayer({ url, watermark, onHeartbeat }: Props) {
         />
       ) : (
         <iframe
-          src={toEmbedUrl(url)}
+          src={toEmbedUrl(resolved)}
+
           title="مشغل الدرس"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; picture-in-picture; fullscreen"
           allowFullScreen
