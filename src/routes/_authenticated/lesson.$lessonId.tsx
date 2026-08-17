@@ -9,6 +9,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { VideoPlayer } from "@/components/video-player";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
+import { resolveMediaUrl } from "@/lib/media";
+
 
 export const Route = createFileRoute("/_authenticated/lesson/$lessonId")({
   head: () => ({
