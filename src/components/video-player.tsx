@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import { resolveMediaUrl } from "@/lib/media";
+
 
 type Props = {
   url: string;
