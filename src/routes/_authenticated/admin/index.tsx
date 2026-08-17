@@ -19,6 +19,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
+import { MediaUploadField } from "@/components/media-upload-field";
+
 
 export const Route = createFileRoute("/_authenticated/admin/")({
   head: () => ({
@@ -294,14 +296,23 @@ function AdminContent() {
               <Label>عنوان الدرس</Label>
               <Input name="title" defaultValue={lessonDialog?.lesson?.title ?? ""} required />
             </div>
-            <div className="space-y-1">
-              <Label>رابط الفيديو (YouTube / Vimeo / MP4)</Label>
-              <Input name="video_url" dir="ltr" defaultValue={lessonDialog?.lesson?.video_url ?? ""} />
-            </div>
-            <div className="space-y-1">
-              <Label>رابط ملف PDF (اختياري)</Label>
-              <Input name="pdf_url" dir="ltr" defaultValue={lessonDialog?.lesson?.pdf_url ?? ""} />
-            </div>
+            <MediaUploadField
+              label="الفيديو (رابط YouTube / Vimeo / MP4 أو ارفع ملفًا)"
+              name="video_url"
+              folder="videos"
+              accept="video/*"
+              hint="https://... أو ارفع الفيديو"
+              defaultValue={lessonDialog?.lesson?.video_url ?? ""}
+            />
+            <MediaUploadField
+              label="ملف PDF (اختياري)"
+              name="pdf_url"
+              folder="pdfs"
+              accept="application/pdf"
+              hint="https://... أو ارفع الملف"
+              defaultValue={lessonDialog?.lesson?.pdf_url ?? ""}
+            />
+
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
                 <Label>المدة (دقيقة)</Label>

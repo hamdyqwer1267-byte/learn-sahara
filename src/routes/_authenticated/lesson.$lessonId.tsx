@@ -9,6 +9,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { VideoPlayer } from "@/components/video-player";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
+import { resolveMediaUrl } from "@/lib/media";
+
 
 export const Route = createFileRoute("/_authenticated/lesson/$lessonId")({
   head: () => ({
@@ -143,12 +145,17 @@ function LessonPage() {
                 {data.progress?.completed ? "تم إكمال الدرس" : "تحديد كمكتمل"}
               </Button>
               {lesson.pdf_url ? (
-                <Button variant="outline" asChild>
-                  <a href={lesson.pdf_url} target="_blank" rel="noreferrer">
-                    <Download className="size-4" /> تحميل المرفق PDF
-                  </a>
+                <Button
+                  variant="outline"
+                  onClick={async () => {
+                    const href = await resolveMediaUrl(lesson.pdf_url);
+                    if (href) window.open(href, "_blank", "noreferrer");
+                  }}
+                >
+                  <Download className="size-4" /> تحميل المرفق PDF
                 </Button>
               ) : null}
+
             </div>
           </CardContent>
         </Card>
