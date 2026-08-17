@@ -19,6 +19,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
+import { MediaUploadField } from "@/components/media-upload-field";
+
 
 export const Route = createFileRoute("/_authenticated/admin/")({
   head: () => ({
