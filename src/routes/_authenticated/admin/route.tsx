@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
-import { BookOpen, ClipboardList, Ticket, Users } from "lucide-react";
+import { BookOpen, ClipboardList, ShieldCheck, Ticket, Users } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -13,7 +13,9 @@ const NAV = [
   { to: "/admin/quizzes", label: "الامتحانات", icon: ClipboardList },
   { to: "/admin/students", label: "الطلاب", icon: Users },
   { to: "/admin/codes", label: "أكواد التفعيل", icon: Ticket },
+  { to: "/admin/admins", label: "المشرفون", icon: ShieldCheck },
 ] as const;
+
 
 function AdminLayout() {
   const { isAdmin, loading } = useAuth();
