@@ -20,9 +20,9 @@ import {
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "تسجيل الدخول | منصة النخبة التعليمية" },
+      { title: "تسجيل الدخول | خليك علومنجي" },
       { name: "description", content: "سجّل دخولك أو أنشئ حسابًا جديدًا للوصول إلى دروسك وامتحاناتك." },
-      { property: "og:title", content: "تسجيل الدخول | منصة النخبة التعليمية" },
+      { property: "og:title", content: "تسجيل الدخول | خليك علومنجي" },
       { property: "og:description", content: "سجّل دخولك للوصول إلى دروسك وامتحاناتك." },
     ],
   }),
@@ -34,7 +34,7 @@ const GRADES = ["الصف الأول الثانوي", "الصف الثاني ا�
 const signUpSchema = z.object({
   full_name: z.string().trim().min(3, "الاسم قصير جدًا").max(80),
   email: z.string().trim().email("بريد إلكتروني غير صحيح").max(255),
-  password: z.string().min(6, "كلمة المرور 6 أحرف على الأقل").max(72),
+  password: z.string().min(8, "كلمة المرور 8 أحرف على الأقل").max(72),
   phone: z.string().trim().min(8, "رقم هاتف غير صحيح").max(20),
   parent_phone: z.string().trim().max(20),
   grade: z.string().min(1, "اختر الصف الدراسي"),
@@ -44,6 +44,23 @@ function AuthPage() {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
   const [busy, setBusy] = useState(false);
+  const [forgot, setForgot] = useState(false);
+
+  const handleForgot = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const email = String(new FormData(e.currentTarget).get("email") ?? "").trim();
+    setBusy(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    setBusy(false);
+    if (error) {
+      toast.error("تعذّر إرسال رابط الاستعادة، حاول لاحقًا");
+      return;
+    }
+    toast.success("تم إرسال رابط إعادة التعيين إلى بريدك");
+    setForgot(false);
+  };
 
   useEffect(() => {
     if (!loading && user) navigate({ to: "/dashboard", replace: true });
@@ -111,7 +128,7 @@ function AuthPage() {
           <span className="bg-gold-gradient flex size-10 items-center justify-center rounded-xl text-accent-foreground">
             <GraduationCap className="size-5" />
           </span>
-          <span className="text-xl font-extrabold">منصة النخبة التعليمية</span>
+          <span className="text-xl font-extrabold">خليك علومنجي</span>
         </Link>
 
         <div className="surface-card animate-float-up p-6">
@@ -122,20 +139,51 @@ function AuthPage() {
             </TabsList>
 
             <TabsContent value="signin">
-              <form onSubmit={handleSignIn} className="space-y-4 pt-4">
-                <div className="space-y-2">
-                  <Label htmlFor="si-email">البريد الإلكتروني</Label>
-                  <Input id="si-email" name="email" type="email" required dir="ltr" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="si-pass">كلمة المرور</Label>
-                  <Input id="si-pass" name="password" type="password" required dir="ltr" />
-                </div>
-                <Button type="submit" className="w-full" disabled={busy}>
-                  تسجيل الدخول
-                </Button>
-              </form>
+              {forgot ? (
+                <form onSubmit={handleForgot} className="space-y-4 pt-4">
+                  <p className="text-sm text-muted-foreground">
+                    أدخل بريدك الإلكتروني وسنرسل لك رابطًا لإعادة تعيين كلمة السر.
+                  </p>
+                  <div className="space-y-2">
+                    <Label htmlFor="fp-email">البريد الإلكتروني</Label>
+                    <Input id="fp-email" name="email" type="email" required dir="ltr" />
+                  </div>
+                  <Button type="submit" className="w-full" disabled={busy}>
+                    إرسال رابط الاستعادة
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="w-full"
+                    onClick={() => setForgot(false)}
+                  >
+                    الرجوع لتسجيل الدخول
+                  </Button>
+                </form>
+              ) : (
+                <form onSubmit={handleSignIn} className="space-y-4 pt-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="si-email">البريد الإلكتروني</Label>
+                    <Input id="si-email" name="email" type="email" required dir="ltr" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="si-pass">كلمة المرور</Label>
+                    <Input id="si-pass" name="password" type="password" required dir="ltr" />
+                  </div>
+                  <Button type="submit" className="w-full" disabled={busy}>
+                    تسجيل الدخول
+                  </Button>
+                  <button
+                    type="button"
+                    onClick={() => setForgot(true)}
+                    className="w-full text-sm text-primary underline-offset-4 hover:underline"
+                  >
+                    نسيت كلمة السر؟
+                  </button>
+                </form>
+              )}
             </TabsContent>
+
 
             <TabsContent value="signup">
               <form onSubmit={handleSignUp} className="space-y-4 pt-4">

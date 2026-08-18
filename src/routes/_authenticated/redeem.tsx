@@ -11,7 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 export const Route = createFileRoute("/_authenticated/redeem")({
   head: () => ({
     meta: [
-      { title: "تفعيل كود الكورس | منصة النخبة التعليمية" },
+      { title: "تفعيل كود الكورس | خليك علومنجي" },
       { name: "description", content: "أدخل كود التفعيل الخاص بك لفتح الكورس فورًا." },
       { property: "og:title", content: "تفعيل كود الكورس" },
       { property: "og:description", content: "أدخل كود التفعيل الخاص بك لفتح الكورس فورًا." },

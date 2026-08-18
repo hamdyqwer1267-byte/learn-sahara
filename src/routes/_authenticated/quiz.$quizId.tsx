@@ -16,7 +16,7 @@ import { useAuth } from "@/lib/auth";
 export const Route = createFileRoute("/_authenticated/quiz/$quizId")({
   head: () => ({
     meta: [
-      { title: "الامتحان الإلكتروني | منصة النخبة التعليمية" },
+      { title: "الامتحان الإلكتروني | خليك علومنجي" },
       { name: "description", content: "امتحان بمؤقت زمني وتصحيح فوري ومراجعة تفصيلية للإجابات." },
       { property: "og:title", content: "الامتحان الإلكتروني" },
       { property: "og:description", content: "امتحان بمؤقت زمني وتصحيح فوري ومراجعة للإجابات." },

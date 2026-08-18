@@ -12,9 +12,9 @@ import { useAuth } from "@/lib/auth";
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
     meta: [
-      { title: "لوحة الطالب | منصة النخبة التعليمية" },
+      { title: "لوحة الطالب | خليك علومنجي" },
       { name: "description", content: "تابع كورساتك ونسبة إنجازك ودرجات امتحاناتك في مكان واحد." },
-      { property: "og:title", content: "لوحة الطالب | منصة النخبة التعليمية" },
+      { property: "og:title", content: "لوحة الطالب | خليك علومنجي" },
       { property: "og:description", content: "تابع كورساتك ودرجاتك ونسبة إنجازك." },
     ],
   }),
