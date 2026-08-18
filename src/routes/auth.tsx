@@ -44,6 +44,23 @@ function AuthPage() {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
   const [busy, setBusy] = useState(false);
+  const [forgot, setForgot] = useState(false);
+
+  const handleForgot = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const email = String(new FormData(e.currentTarget).get("email") ?? "").trim();
+    setBusy(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    setBusy(false);
+    if (error) {
+      toast.error("تعذّر إرسال رابط الاستعادة، حاول لاحقًا");
+      return;
+    }
+    toast.success("تم إرسال رابط إعادة التعيين إلى بريدك");
+    setForgot(false);
+  };
 
   useEffect(() => {
     if (!loading && user) navigate({ to: "/dashboard", replace: true });
