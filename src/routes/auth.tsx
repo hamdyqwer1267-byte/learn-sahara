@@ -34,7 +34,7 @@ const GRADES = ["الصف الأول الثانوي", "الصف الثاني ا�
 const signUpSchema = z.object({
   full_name: z.string().trim().min(3, "الاسم قصير جدًا").max(80),
   email: z.string().trim().email("بريد إلكتروني غير صحيح").max(255),
-  password: z.string().min(6, "كلمة المرور 6 أحرف على الأقل").max(72),
+  password: z.string().min(8, "كلمة المرور 8 أحرف على الأقل").max(72),
   phone: z.string().trim().min(8, "رقم هاتف غير صحيح").max(20),
   parent_phone: z.string().trim().max(20),
   grade: z.string().min(1, "اختر الصف الدراسي"),
