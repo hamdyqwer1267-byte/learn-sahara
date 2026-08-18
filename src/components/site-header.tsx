@@ -26,7 +26,7 @@ export function SiteHeader() {
           <span className="bg-gold-gradient flex size-9 items-center justify-center rounded-xl text-accent-foreground">
             <GraduationCap className="size-5" />
           </span>
-          <span className="text-lg font-extrabold">منصة النخبة التعليمية</span>
+          <span className="text-lg font-extrabold">خليك علومنجي</span>
         </Link>
 
         <nav className="hidden items-center gap-1 md:flex">

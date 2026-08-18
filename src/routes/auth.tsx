@@ -20,9 +20,9 @@ import {
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "تسجيل الدخول | منصة النخبة التعليمية" },
+      { title: "تسجيل الدخول | خليك علومنجي" },
       { name: "description", content: "سجّل دخولك أو أنشئ حسابًا جديدًا للوصول إلى دروسك وامتحاناتك." },
-      { property: "og:title", content: "تسجيل الدخول | منصة النخبة التعليمية" },
+      { property: "og:title", content: "تسجيل الدخول | خليك علومنجي" },
       { property: "og:description", content: "سجّل دخولك للوصول إلى دروسك وامتحاناتك." },
     ],
   }),
@@ -111,7 +111,7 @@ function AuthPage() {
           <span className="bg-gold-gradient flex size-10 items-center justify-center rounded-xl text-accent-foreground">
             <GraduationCap className="size-5" />
           </span>
-          <span className="text-xl font-extrabold">منصة النخبة التعليمية</span>
+          <span className="text-xl font-extrabold">خليك علومنجي</span>
         </Link>
 
         <div className="surface-card animate-float-up p-6">

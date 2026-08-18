@@ -18,13 +18,13 @@ import { supabase } from "@/integrations/supabase/client";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "منصة النخبة التعليمية | دروس وامتحانات أونلاين" },
+      { title: "خليك علومنجي | دروس وامتحانات أونلاين" },
       {
         name: "description",
         content:
           "منصة تعليمية عربية متكاملة: شرح فيديو منظم في وحدات، امتحانات إلكترونية بمؤقت وتصحيح فوري، وتفعيل الكورسات بالأكواد.",
       },
-      { property: "og:title", content: "منصة النخبة التعليمية | دروس وامتحانات أونلاين" },
+      { property: "og:title", content: "خليك علومنجي | دروس وامتحانات أونلاين" },
       {
         property: "og:description",
         content: "دروس فيديو محمية، امتحانات بمؤقت وتصحيح فوري، ومتابعة كاملة لمستوى الطالب.",
@@ -166,7 +166,7 @@ function Landing() {
       ) : null}
 
       <footer className="border-t border-border py-8 text-center text-sm text-muted-foreground">
-        © {new Date().getFullYear()} منصة النخبة التعليمية — جميع الحقوق محفوظة.
+        © {new Date().getFullYear()} خليك علومنجي — جميع الحقوق محفوظة.
       </footer>
     </div>
   );

@@ -80,12 +80,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "منصة النخبة التعليمية" },
+      { title: "خليك علومنجي" },
       {
         name: "description",
         content: "منصة تعليمية عربية متكاملة: دروس فيديو، امتحانات إلكترونية، ومتابعة للطلاب.",
       },
-      { property: "og:title", content: "منصة النخبة التعليمية" },
+      { property: "og:title", content: "خليك علومنجي" },
       {
         property: "og:description",
         content: "منصة تعليمية عربية متكاملة: دروس فيديو، امتحانات إلكترونية، ومتابعة للطلاب.",

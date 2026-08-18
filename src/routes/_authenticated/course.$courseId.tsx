@@ -12,7 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 export const Route = createFileRoute("/_authenticated/course/$courseId")({
   head: () => ({
     meta: [
-      { title: "محتوى الكورس | منصة النخبة التعليمية" },
+      { title: "محتوى الكورس | خليك علومنجي" },
       { name: "description", content: "وحدات ودروس الكورس مع الامتحانات ومتابعة الإنجاز." },
       { property: "og:title", content: "محتوى الكورس" },
       { property: "og:description", content: "وحدات ودروس الكورس مع الامتحانات ومتابعة الإنجاز." },

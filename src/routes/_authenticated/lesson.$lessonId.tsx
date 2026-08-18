@@ -15,7 +15,7 @@ import { resolveMediaUrl } from "@/lib/media";
 export const Route = createFileRoute("/_authenticated/lesson/$lessonId")({
   head: () => ({
     meta: [
-      { title: "مشاهدة الدرس | منصة النخبة التعليمية" },
+      { title: "مشاهدة الدرس | خليك علومنجي" },
       { name: "description", content: "مشغل الدروس مع المرفقات وتحديد الدرس كمكتمل." },
       { property: "og:title", content: "مشاهدة الدرس" },
       { property: "og:description", content: "مشغل الدروس مع المرفقات وتحديد الدرس كمكتمل." },

@@ -12,9 +12,9 @@ import { useAuth } from "@/lib/auth";
 export const Route = createFileRoute("/courses")({
   head: () => ({
     meta: [
-      { title: "الكورسات | منصة النخبة التعليمية" },
+      { title: "الكورسات | خليك علومنجي" },
       { name: "description", content: "تصفح جميع الكورسات المتاحة حسب الصف الدراسي وفعّلها بالكود." },
-      { property: "og:title", content: "الكورسات | منصة النخبة التعليمية" },
+      { property: "og:title", content: "الكورسات | خليك علومنجي" },
       { property: "og:description", content: "تصفح جميع الكورسات المتاحة حسب الصف الدراسي." },
     ],
   }),
