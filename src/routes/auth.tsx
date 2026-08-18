@@ -122,20 +122,51 @@ function AuthPage() {
             </TabsList>
 
             <TabsContent value="signin">
-              <form onSubmit={handleSignIn} className="space-y-4 pt-4">
-                <div className="space-y-2">
-                  <Label htmlFor="si-email">البريد الإلكتروني</Label>
-                  <Input id="si-email" name="email" type="email" required dir="ltr" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="si-pass">كلمة المرور</Label>
-                  <Input id="si-pass" name="password" type="password" required dir="ltr" />
-                </div>
-                <Button type="submit" className="w-full" disabled={busy}>
-                  تسجيل الدخول
-                </Button>
-              </form>
+              {forgot ? (
+                <form onSubmit={handleForgot} className="space-y-4 pt-4">
+                  <p className="text-sm text-muted-foreground">
+                    أدخل بريدك الإلكتروني وسنرسل لك رابطًا لإعادة تعيين كلمة السر.
+                  </p>
+                  <div className="space-y-2">
+                    <Label htmlFor="fp-email">البريد الإلكتروني</Label>
+                    <Input id="fp-email" name="email" type="email" required dir="ltr" />
+                  </div>
+                  <Button type="submit" className="w-full" disabled={busy}>
+                    إرسال رابط الاستعادة
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="w-full"
+                    onClick={() => setForgot(false)}
+                  >
+                    الرجوع لتسجيل الدخول
+                  </Button>
+                </form>
+              ) : (
+                <form onSubmit={handleSignIn} className="space-y-4 pt-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="si-email">البريد الإلكتروني</Label>
+                    <Input id="si-email" name="email" type="email" required dir="ltr" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="si-pass">كلمة المرور</Label>
+                    <Input id="si-pass" name="password" type="password" required dir="ltr" />
+                  </div>
+                  <Button type="submit" className="w-full" disabled={busy}>
+                    تسجيل الدخول
+                  </Button>
+                  <button
+                    type="button"
+                    onClick={() => setForgot(true)}
+                    className="w-full text-sm text-primary underline-offset-4 hover:underline"
+                  >
+                    نسيت كلمة السر؟
+                  </button>
+                </form>
+              )}
             </TabsContent>
+
 
             <TabsContent value="signup">
               <form onSubmit={handleSignUp} className="space-y-4 pt-4">
