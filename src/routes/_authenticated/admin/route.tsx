@@ -44,13 +44,14 @@ function AdminLayout() {
   return (
     <main className="mx-auto max-w-7xl px-4 py-8">
       <h1 className="text-3xl font-black">لوحة تحكم المدرّس</h1>
-      <nav className="mt-5 flex flex-wrap gap-2 border-b border-border pb-3">
+      <nav className="mt-5 -mx-4 flex gap-2 overflow-x-auto border-b border-border px-4 pb-3 md:mx-0 md:flex-wrap md:px-0">
         {NAV.map((n) => (
           <Button
             key={n.to}
             variant={pathname === n.to ? "default" : "ghost"}
             asChild
             size="sm"
+            className="shrink-0"
           >
             <Link to={n.to}>
               <n.icon className="size-4" /> {n.label}

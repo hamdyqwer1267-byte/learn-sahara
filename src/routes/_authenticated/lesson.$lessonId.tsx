@@ -26,7 +26,7 @@ export const Route = createFileRoute("/_authenticated/lesson/$lessonId")({
 
 function LessonPage() {
   const { lessonId } = Route.useParams();
-  const { user, profile } = useAuth();
+  const { user, profile, isAdmin } = useAuth();
   const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery({
@@ -103,7 +103,7 @@ function LessonPage() {
   }
 
   const lesson = data.lesson;
-  const locked = !data.enrolled && !lesson.is_free;
+  const locked = !data.enrolled && !lesson.is_free && !isAdmin;
   const courseId = lesson.units?.course_id;
 
   if (locked) {
