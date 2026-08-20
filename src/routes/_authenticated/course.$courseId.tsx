@@ -8,6 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/lib/auth";
 
 export const Route = createFileRoute("/_authenticated/course/$courseId")({
   head: () => ({
@@ -23,6 +24,7 @@ export const Route = createFileRoute("/_authenticated/course/$courseId")({
 
 function CoursePage() {
   const { courseId } = Route.useParams();
+  const { isAdmin } = useAuth();
 
   const { data, isLoading } = useQuery({
     queryKey: ["course", courseId],
@@ -62,6 +64,7 @@ function CoursePage() {
     return <main className="mx-auto max-w-5xl px-4 py-20 text-center">الكورس غير موجود.</main>;
   }
 
+  const enrolled = data.enrolled || isAdmin;
   const completedIds = new Set(data.progress.filter((p) => p.completed).map((p) => p.lesson_id));
   const allLessons = data.units.flatMap((u) => u.lessons ?? []);
   const pct = allLessons.length
@@ -79,7 +82,7 @@ function CoursePage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="opacity-90">{data.course.description}</p>
-          {data.enrolled ? (
+          {enrolled ? (
             <div className="max-w-md">
               <Progress value={pct} />
               <p className="mt-2 text-sm opacity-90">نسبة إنجازك في الكورس: {pct}%</p>
@@ -106,7 +109,7 @@ function CoursePage() {
               {[...(unit.lessons ?? [])]
                 .sort((a, b) => a.position - b.position)
                 .map((lesson) => {
-                  const unlocked = data.enrolled || lesson.is_free;
+                  const unlocked = enrolled || lesson.is_free;
                   const done = completedIds.has(lesson.id);
                   return (
                     <div
@@ -168,7 +171,7 @@ function CoursePage() {
               <p className="text-sm text-muted-foreground">
                 المدة: {q.time_limit_minutes} دقيقة • درجة النجاح: {q.passing_grade}%
               </p>
-              {data.enrolled ? (
+              {enrolled ? (
                 <Button asChild className="w-full">
                   <Link to="/quiz/$quizId" params={{ quizId: q.id }}>
                     ابدأ الامتحان
