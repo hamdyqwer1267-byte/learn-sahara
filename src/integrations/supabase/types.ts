@@ -79,6 +79,79 @@ export type Database = {
           },
         ]
       }
+      exam_commands: {
+        Row: {
+          action: string
+          consumed_at: string | null
+          created_at: string
+          id: string
+          message: string
+          quiz_id: string | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          consumed_at?: string | null
+          created_at?: string
+          id?: string
+          message?: string
+          quiz_id?: string | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          consumed_at?: string | null
+          created_at?: string
+          id?: string
+          message?: string
+          quiz_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_commands_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "quizzes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exam_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          quiz_id: string
+          user_id: string
+          warning_count: number
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          quiz_id: string
+          user_id: string
+          warning_count?: number
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          quiz_id?: string
+          user_id?: string
+          warning_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_events_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "quizzes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lesson_progress: {
         Row: {
           completed: boolean
@@ -123,6 +196,7 @@ export type Database = {
           is_free: boolean
           pdf_url: string | null
           position: number
+          publish_at: string | null
           title: string
           unit_id: string
           video_url: string
@@ -135,6 +209,7 @@ export type Database = {
           is_free?: boolean
           pdf_url?: string | null
           position?: number
+          publish_at?: string | null
           title: string
           unit_id: string
           video_url?: string
@@ -147,6 +222,7 @@ export type Database = {
           is_free?: boolean
           pdf_url?: string | null
           position?: number
+          publish_at?: string | null
           title?: string
           unit_id?: string
           video_url?: string
@@ -353,6 +429,36 @@ export type Database = {
           },
         ]
       }
+      support_messages: {
+        Row: {
+          body: string
+          created_at: string
+          from_admin: boolean
+          id: string
+          read_at: string | null
+          sender_id: string
+          student_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          from_admin?: boolean
+          id?: string
+          read_at?: string | null
+          sender_id: string
+          student_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          from_admin?: boolean
+          id?: string
+          read_at?: string | null
+          sender_id?: string
+          student_id?: string
+        }
+        Relationships: []
+      }
       units: {
         Row: {
           course_id: string
@@ -384,6 +490,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_presence: {
+        Row: {
+          activity: string
+          detail: string
+          last_seen: string
+          session_id: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          activity?: string
+          detail?: string
+          last_seen?: string
+          session_id?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          activity?: string
+          detail?: string
+          last_seen?: string
+          session_id?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {
