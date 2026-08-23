@@ -63,7 +63,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
           >
             إعادة المحاولة
           </button>
-          <a
+          
             href="/"
             className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
           >
@@ -92,8 +92,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "google-site-verification", content: "q9tK8M5z_W3M12hI9YOpJGIu6umTB2OVW5CuETSfRKY" },
     ],
-    <meta name="google-site-verification" content="q9tK8M5z_W3M12hI9YOpJGIu6umTB2OVW5CuETSfRKY" />
     links: [
       { rel: "stylesheet", href: appCss },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
