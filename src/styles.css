@@ -248,3 +248,9 @@
 @utility animate-watermark {
   animation: drift 32s linear infinite;
 }
+
+/* Hide Lovable branding badge */
+[data-lovable-badge],
+a[href*="lovable.dev"] {
+  display: none !important;
+}
