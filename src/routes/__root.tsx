@@ -64,6 +64,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
             إعادة المحاولة
           </button>
           
+          <a
             href="/"
             className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
           >
@@ -84,6 +85,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         name: "description",
         content: "منصة تعليمية عربية متكاملة: دروس فيديو، امتحانات إلكترونية، ومتابعة للطلاب.",
+      },
+      {
+        name: "keywords",
+        content: "خليك علومنجي, منصة علومنجي, علومنجي, كورسات علوم, امتحانات إلكترونية",
       },
       { property: "og:title", content: "خليك علومنجي" },
       {
