@@ -249,6 +249,46 @@
   animation: drift 32s linear infinite;
 }
 
+@keyframes drift-a {
+  0% { transform: translate(5vw, 8vh); }
+  50% { transform: translate(70vw, 55vh); }
+  100% { transform: translate(5vw, 8vh); }
+}
+@keyframes drift-b {
+  0% { transform: translate(65vw, 12vh); }
+  50% { transform: translate(12vw, 78vh); }
+  100% { transform: translate(65vw, 12vh); }
+}
+@keyframes drift-c {
+  0% { transform: translate(30vw, 85vh); }
+  50% { transform: translate(78vw, 20vh); }
+  100% { transform: translate(30vw, 85vh); }
+}
+
+@utility animate-drift-a {
+  animation: drift-a 47s linear infinite;
+}
+@utility animate-drift-b {
+  animation: drift-b 61s linear infinite;
+}
+@utility animate-drift-c {
+  animation: drift-c 73s linear infinite;
+}
+
+.no-select,
+.no-select * {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -webkit-touch-callout: none;
+}
+
+.no-select input,
+.no-select textarea {
+  user-select: text !important;
+  -webkit-user-select: text !important;
+}
+
+
 /* Hide Lovable branding badge */
 [data-lovable-badge],
 a[href*="lovable.dev"] {
