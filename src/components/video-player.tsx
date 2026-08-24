@@ -78,26 +78,13 @@ export function VideoPlayer({ url, watermark, onHeartbeat }: Props) {
         />
       )}
 
-     {/* Dynamic anti-piracy watermark */}
-<div
-  className="pointer-events-none absolute inset-0 overflow-hidden select-none"
-  aria-hidden="true"
->
-  <span className="animate-watermark absolute left-[8%] top-[12%] text-[10px] font-bold text-red-500/20">
-    {watermark}
-  </span>
-
-  <span className="animate-watermark absolute right-[12%] top-[42%] text-[10px] font-bold text-red-500/20">
-    {watermark}
-  </span>
-
-  <span className="animate-watermark absolute bottom-[15%] left-[25%] text-[10px] font-bold text-red-500/20">
-    {watermark}
-  </span>
-
-  <span className="animate-watermark absolute bottom-[35%] right-[30%] text-[10px] font-bold text-red-500/15">
-    {watermark}
-  </span>
-</div>
+      {/* علامة مائية ديناميكية لمنع التسريب */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <span className="animate-watermark absolute top-4 right-4 rounded bg-black/35 px-2 py-1 text-[11px] font-bold text-white/70 select-none">
+          {watermark}
+        </span>
+      </div>
+      <span className="sr-only">{seconds} ثانية مشاهدة</span>
+    </div>
   );
 }
