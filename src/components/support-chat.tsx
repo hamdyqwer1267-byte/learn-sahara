@@ -16,29 +16,34 @@ type SupportMessage = {
 
 type SupportChatProps = {
   adminMode?: boolean;
+  adminModeStudentId?: string;
+  onDeleted?: () => void;
 };
 
-export function SupportChat({ adminMode = false }: SupportChatProps) {
+export function SupportChat({
+  adminMode = false,
+  adminModeStudentId,
+  onDeleted,
+}: SupportChatProps) {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<SupportMessage[]>([]);
   const [message, setMessage] = useState("");
   const [studentId, setStudentId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const loadMessages = async (userId: string) => {
-    const query = supabase
-      .from("support_messages")
-      .select("*")
-      .order("created_at", { ascending: true });
+ const loadMessages = async (userId: string) => {
+  const targetStudentId = adminModeStudentId ?? userId;
 
-    const { data, error } = adminMode
-      ? await query
-      : await query.eq("student_id", userId);
+  const { data, error } = await supabase
+    .from("support_messages")
+    .select("*")
+    .eq("student_id", targetStudentId)
+    .order("created_at", { ascending: true });
 
-    if (!error) {
-      setMessages((data ?? []) as SupportMessage[]);
-    }
-  };
+  if (!error) {
+    setMessages((data ?? []) as SupportMessage[]);
+  }
+};
 
   useEffect(() => {
     let mounted = true;
@@ -65,25 +70,23 @@ export function SupportChat({ adminMode = false }: SupportChatProps) {
   useEffect(() => {
     if (!studentId) return;
 
-    const channel = supabase
-      .channel(`support-chat-${adminMode ? "admin" : studentId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "support_messages",
-          ...(adminMode
-            ? {}
-            : {
-                filter: `student_id=eq.${studentId}`,
-              }),
-        },
-        () => {
-          void loadMessages(studentId);
-        }
-      )
-      .subscribe();
+   const targetStudentId = adminModeStudentId ?? studentId;
+
+const channel = supabase
+  .channel(`support-chat-${adminMode ? "admin" : targetStudentId}`)
+  .on(
+    "postgres_changes",
+    {
+      event: "*",
+      schema: "public",
+      table: "support_messages",
+      filter: `student_id=eq.${targetStudentId}`,
+    },
+    () => {
+      void loadMessages(studentId);
+    }
+  )
+  .subscribe();
 
     return () => {
       void supabase.removeChannel(channel);
@@ -97,12 +100,12 @@ export function SupportChat({ adminMode = false }: SupportChatProps) {
 
     setLoading(true);
 
-    const { error } = await supabase.from("support_messages").insert({
-      student_id: studentId,
-      sender_id: studentId,
-      from_admin: adminMode,
-      body,
-    });
+  const { error } = await supabase.from("support_messages").insert({
+  student_id: adminModeStudentId ?? studentId,
+  sender_id: studentId,
+  from_admin: adminMode,
+  body,
+});
 
     setLoading(false);
 
@@ -116,7 +119,9 @@ export function SupportChat({ adminMode = false }: SupportChatProps) {
   };
 
   const deleteConversation = async () => {
-    if (!adminMode || !studentId) return;
+  if (!adminMode || !studentId) return;
+
+const targetStudentId = adminModeStudentId ?? studentId;
 
     const confirmed = window.confirm(
       "هل أنت متأكد من حذف المحادثة بالكامل؟"
@@ -127,14 +132,14 @@ export function SupportChat({ adminMode = false }: SupportChatProps) {
     const { error } = await supabase
       .from("support_messages")
       .delete()
-      .eq("student_id", studentId);
-
+      .eq("student_id", targetStudentId);
     if (error) {
       console.error(error);
       return;
     }
 
     setMessages([]);
+    onDeleted?.();
   };
 
   if (adminMode) {
