@@ -78,13 +78,11 @@ export function VideoPlayer({ url, watermark, onHeartbeat }: Props) {
         />
       )}
 
-      {/* علامة مائية ديناميكية لمنع التسريب */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <span className="animate-watermark absolute top-4 right-4 rounded bg-black/35 px-2 py-1 text-[11px] font-bold text-white/70 select-none">
-          {watermark}
-        </span>
-      </div>
-      <span className="sr-only">{seconds} ثانية مشاهدة</span>
-    </div>
+    {/* Watermark الطالب - يتحرك داخل الفيديو */}
+<div className="pointer-events-none absolute inset-0 z-20 overflow-hidden select-none">
+  <span className="student-watermark absolute whitespace-nowrap text-[10px] font-bold text-red-500/55">
+    {watermark}
+  </span>
+</div>
   );
 }
