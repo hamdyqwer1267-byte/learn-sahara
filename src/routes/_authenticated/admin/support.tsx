@@ -195,7 +195,11 @@ function AdminConversation({
 }) {
   return (
     <div className="h-full">
-      <SupportChat adminModeStudentId={studentId} onDeleted={onDeleted} />
+     <SupportChat
+  adminMode
+  adminModeStudentId={studentId}
+  onDeleted={onDeleted}
+/>
     </div>
   );
 }
