@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
-import { Search, Users } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Search, Users, MessageCircle, Circle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -24,6 +24,17 @@ export const Route = createFileRoute("/_authenticated/admin/students")({
 function AdminStudents() {
   const [q, setQ] = useState("");
   const [grade, setGrade] = useState("all");
+  const [presence, setPresence] = useState<
+  Record<
+    string,
+    {
+      status: string;
+      activity: string;
+      detail: string;
+      last_seen: string;
+    }
+  >
+>({});
 
   const { data, isLoading } = useQuery({
     queryKey: ["admin-students"],
@@ -34,6 +45,55 @@ function AdminStudents() {
         supabase.from("quiz_attempts").select("user_id,percentage,passed"),
         supabase.from("enrollments").select("user_id,course_id"),
       ]);
+      useEffect(() => {
+  const loadPresence = async () => {
+    const { data } = await supabase
+      .from("user_presence")
+      .select("user_id,status,activity,detail,last_seen");
+
+    if (!data) return;
+
+    const mapped: Record<string, (typeof data)[number]> = {};
+
+    for (const item of data) {
+      mapped[item.user_id] = item;
+    }
+
+    setPresence(mapped);
+  };
+
+  void loadPresence();
+
+  const channel = supabase
+    .channel("admin-student-presence")
+    .on(
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
+        table: "user_presence",
+      },
+      (payload) => {
+        const row = payload.new as {
+          user_id: string;
+          status: string;
+          activity: string;
+          detail: string;
+          last_seen: string;
+        };
+
+        setPresence((current) => ({
+          ...current,
+          [row.user_id]: row,
+        }));
+      },
+    )
+    .subscribe();
+
+  return () => {
+    void supabase.removeChannel(channel);
+  };
+}, []);
       return {
         profiles: profiles.data ?? [],
         progress: progress.data ?? [],
@@ -61,7 +121,12 @@ function AdminStudents() {
         const prog = data.progress.filter((x) => x.user_id === p.id);
         const att = data.attempts.filter((x) => x.user_id === p.id);
         const avg = att.length ? Math.round(att.reduce((a, b) => a + b.percentage, 0) / att.length) : 0;
+        const live = presence[p.id];
         return {
+          online: live?.status === "online",
+activity: live?.activity ?? "offline",
+activityDetail: live?.detail ?? "",
+lastSeen: live?.last_seen ?? null,
           ...p,
           completed: prog.filter((x) => x.completed).length,
           watchHours: (prog.reduce((a, b) => a + (b.watch_seconds ?? 0), 0) / 3600).toFixed(1),
@@ -111,6 +176,8 @@ function AdminStudents() {
           <thead className="text-muted-foreground">
             <tr className="border-b border-border text-start">
               <th className="p-2 text-start">الطالب</th>
+              <th className="p-2 text-start">الحالة</th>
+              <th className="p-2 text-start">النشاط</th>
               <th className="p-2 text-start">الصف</th>
               <th className="p-2 text-start">الكورسات</th>
               <th className="p-2 text-start">دروس مكتملة</th>
@@ -126,8 +193,81 @@ function AdminStudents() {
                   <p className="font-bold">{r.full_name || "بدون اسم"}</p>
                   <p dir="ltr" className="text-xs text-muted-foreground">
                     {r.phone || "—"}
+                    <div className="mt-2 flex gap-1">
+  {r.phone ? (
+    <a
+      href={`https://wa.me/${String(r.phone).replace(/\D/g, "")}`}
+      target="_blank"
+      rel="noreferrer"
+      className="inline-flex items-center gap-1 rounded-md bg-green-600 px-2 py-1 text-[10px] font-bold text-white transition hover:bg-green-700"
+    >
+      <MessageCircle className="size-3" />
+      الطالب
+    </a>
+  ) : null}
+
+  {r.parent_phone ? (
+    <a
+      href={`https://wa.me/${String(r.parent_phone).replace(/\D/g, "")}`}
+      target="_blank"
+      rel="noreferrer"
+      className="inline-flex items-center gap-1 rounded-md bg-green-700 px-2 py-1 text-[10px] font-bold text-white transition hover:bg-green-800"
+    >
+      <MessageCircle className="size-3" />
+      ولي الأمر
+    </a>
+  ) : null}
+</div>
                   </p>
                 </td>
+                <td className="p-2">
+  <div className="flex items-center gap-2">
+    <Circle
+      className={`size-3 fill-current ${
+        r.online
+          ? "text-green-500"
+          : "text-muted-foreground"
+      }`}
+    />
+
+    <span>
+      {r.online ? "متصل الآن" : "غير متصل"}
+    </span>
+  </div>
+
+  {r.lastSeen ? (
+    <p className="mt-1 text-[10px] text-muted-foreground">
+      آخر ظهور:{" "}
+      {new Date(r.lastSeen).toLocaleString("ar-EG")}
+    </p>
+  ) : null}
+</td>
+
+<td className="p-2">
+  {r.activity === "exam" ? (
+    <Badge variant="destructive">
+      أداء امتحان
+    </Badge>
+  ) : r.activity === "video" ? (
+    <Badge variant="default">
+      مشاهدة فيديو
+    </Badge>
+  ) : r.online ? (
+    <Badge variant="secondary">
+      نشط
+    </Badge>
+  ) : (
+    <Badge variant="outline">
+      غير نشط
+    </Badge>
+  )}
+
+  {r.activityDetail ? (
+    <p className="mt-1 max-w-40 truncate text-[10px] text-muted-foreground">
+      {r.activityDetail}
+    </p>
+  ) : null}
+</td>
                 <td className="p-2">{r.grade || "-"}</td>
                 <td className="p-2">{r.courses}</td>
                 <td className="p-2">{r.completed}</td>
