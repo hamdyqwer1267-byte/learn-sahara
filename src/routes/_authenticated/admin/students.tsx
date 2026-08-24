@@ -318,10 +318,12 @@ function AdminStudents() {
                 p.id,
             ).length,
 
-          online:
-            live?.status ===
-            "online",
-
+         online:
+  live?.status === "online" &&
+  !!live?.last_seen &&
+  Date.now() -
+    new Date(live.last_seen).getTime() <
+    45_000,
           activity:
             live?.activity ??
             "offline",
