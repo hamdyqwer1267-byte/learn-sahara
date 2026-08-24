@@ -26,7 +26,9 @@ import { Progress } from "@/components/ui/progress";
 
 import { supabase } from "@/integrations/supabase/client";
 
-export const Route = createFileRoute("/_authenticated/admin/students")({
+export const Route = createFileRoute(
+  "/_authenticated/admin/students",
+)({
   head: () => ({
     meta: [
       {
@@ -37,18 +39,8 @@ export const Route = createFileRoute("/_authenticated/admin/students")({
         content:
           "متابعة تقدم الطلاب ودرجات الامتحانات ووقت المشاهدة والحالة المباشرة.",
       },
-      {
-        property: "og:title",
-        content: "متابعة الطلاب",
-      },
-      {
-        property: "og:description",
-        content:
-          "متابعة تقدم الطلاب ودرجات الامتحانات ووقت المشاهدة والحالة المباشرة.",
-      },
     ],
   }),
-
   component: AdminStudents,
 });
 
@@ -65,18 +57,10 @@ function AdminStudents() {
   const [q, setQ] = useState("");
   const [grade, setGrade] = useState("all");
 
-  /*
-   * حالة الطلاب Live
-   *
-   * المفتاح = user_id
-   */
   const [presence, setPresence] = useState<
     Record<string, PresenceRow>
   >({});
 
-  /*
-   * جلب بيانات الطلاب الأساسية
-   */
   const { data, isLoading } = useQuery({
     queryKey: ["admin-students"],
 
@@ -113,6 +97,22 @@ function AdminStudents() {
           ),
       ]);
 
+      if (profiles.error) {
+        throw profiles.error;
+      }
+
+      if (progress.error) {
+        throw progress.error;
+      }
+
+      if (attempts.error) {
+        throw attempts.error;
+      }
+
+      if (enrollments.error) {
+        throw enrollments.error;
+      }
+
       return {
         profiles: profiles.data ?? [],
         progress: progress.data ?? [],
@@ -124,10 +124,9 @@ function AdminStudents() {
 
   /*
    * تحميل حالة الطلاب الحالية
-   * ثم الاشتراك في Supabase Realtime
    */
   useEffect(() => {
-    let mounted = true;
+    let active = true;
 
     const loadPresence = async () => {
       const { data, error } = await supabase
@@ -138,21 +137,25 @@ function AdminStudents() {
 
       if (error) {
         console.error(
-          "Failed to load student presence:",
+          "Presence error:",
           error,
         );
-
         return;
       }
 
-      if (!mounted || !data) return;
-
-      const mapped: Record<string, PresenceRow> = {};
-
-      for (const item of data) {
-        mapped[item.user_id] =
-          item as PresenceRow;
+      if (!active || !data) {
+        return;
       }
+
+      const mapped: Record<
+        string,
+        PresenceRow
+      > = {};
+
+      data.forEach((row) => {
+        mapped[row.user_id] =
+          row as PresenceRow;
+      });
 
       setPresence(mapped);
     };
@@ -160,7 +163,7 @@ function AdminStudents() {
     void loadPresence();
 
     /*
-     * Realtime subscription
+     * Supabase Realtime
      */
     const channel = supabase
       .channel("admin-student-presence")
@@ -172,9 +175,6 @@ function AdminStudents() {
           table: "user_presence",
         },
         (payload) => {
-          /*
-           * INSERT / UPDATE
-           */
           if (
             payload.eventType === "INSERT" ||
             payload.eventType === "UPDATE"
@@ -188,13 +188,10 @@ function AdminStudents() {
             }));
           }
 
-          /*
-           * DELETE
-           */
           if (
             payload.eventType === "DELETE"
           ) {
-            const oldRow =
+            const row =
               payload.old as {
                 user_id: string;
               };
@@ -204,23 +201,17 @@ function AdminStudents() {
                 ...current,
               };
 
-              delete next[oldRow.user_id];
+              delete next[row.user_id];
 
               return next;
             });
           }
         },
       )
-      .subscribe((status) => {
-        console.log(
-          "Student presence realtime:",
-          status,
-        );
-      });
+      .subscribe();
 
     return () => {
-      mounted = false;
-
+      active = false;
       void supabase.removeChannel(
         channel,
       );
@@ -228,66 +219,70 @@ function AdminStudents() {
   }, []);
 
   /*
-   * الصفوف الموجودة
+   * الصفوف المتاحة
    */
-  const grades = useMemo(
-    () =>
-      Array.from(
-        new Set(
-          (data?.profiles ?? [])
-            .map((p) => p.grade)
-            .filter(Boolean),
-        ),
-      ) as string[],
-
-    [data],
-  );
+  const grades = useMemo(() => {
+    return Array.from(
+      new Set(
+        (data?.profiles ?? [])
+          .map((p) => p.grade)
+          .filter(Boolean),
+      ),
+    ) as string[];
+  }, [data]);
 
   /*
-   * تجهيز بيانات الجدول
+   * تجهيز بيانات الطلاب
    */
   const rows = useMemo(() => {
-    if (!data) return [];
+    if (!data) {
+      return [];
+    }
 
     return data.profiles
-      .filter((p) =>
-        grade === "all"
-          ? true
-          : p.grade === grade,
-      )
-
       .filter((p) => {
-        const text = q.trim();
+        return grade === "all"
+          ? true
+          : p.grade === grade;
+      })
+      .filter((p) => {
+        const search =
+          q.trim().toLowerCase();
 
-        if (!text) return true;
+        if (!search) {
+          return true;
+        }
 
         return `${p.full_name ?? ""} ${
           p.phone ?? ""
         }`
           .toLowerCase()
-          .includes(text.toLowerCase());
+          .includes(search);
       })
-
       .map((p) => {
-        const prog =
+        const progress =
           data.progress.filter(
-            (x) => x.user_id === p.id,
+            (item) =>
+              item.user_id === p.id,
           );
 
-        const att =
+        const attempts =
           data.attempts.filter(
-            (x) => x.user_id === p.id,
+            (item) =>
+              item.user_id === p.id,
           );
 
-        const avg = att.length
-          ? Math.round(
-              att.reduce(
-                (a, b) =>
-                  a + b.percentage,
-                0,
-              ) / att.length,
-            )
-          : 0;
+        const average =
+          attempts.length > 0
+            ? Math.round(
+                attempts.reduce(
+                  (total, item) =>
+                    total +
+                    item.percentage,
+                  0,
+                ) / attempts.length,
+              )
+            : 0;
 
         const live =
           presence[p.id];
@@ -296,33 +291,33 @@ function AdminStudents() {
           ...p,
 
           completed:
-            prog.filter(
-              (x) => x.completed,
+            progress.filter(
+              (item) =>
+                item.completed,
             ).length,
 
           watchHours: (
-            prog.reduce(
-              (a, b) =>
-                a +
-                (b.watch_seconds ??
+            progress.reduce(
+              (total, item) =>
+                total +
+                (item.watch_seconds ??
                   0),
               0,
             ) / 3600
           ).toFixed(1),
 
-          attempts: att.length,
+          attempts:
+            attempts.length,
 
-          avg,
+          average,
 
           courses:
             data.enrollments.filter(
-              (e) =>
-                e.user_id === p.id,
+              (item) =>
+                item.user_id ===
+                p.id,
             ).length,
 
-          /*
-           * Live information
-           */
           online:
             live?.status ===
             "online",
@@ -331,12 +326,11 @@ function AdminStudents() {
             live?.activity ??
             "offline",
 
-          activityDetail:
+          detail:
             live?.detail ?? "",
 
           lastSeen:
-            live?.last_seen ??
-            null,
+            live?.last_seen ?? null,
         };
       });
   }, [
@@ -347,47 +341,32 @@ function AdminStudents() {
   ]);
 
   /*
-   * عدد الطلاب المتصلين
+   * إحصائيات Live
    */
-  const onlineCount = useMemo(
-    () =>
-      rows.filter(
-        (student) =>
-          student.online,
-      ).length,
-    [rows],
-  );
+  const onlineCount =
+    rows.filter(
+      (student) =>
+        student.online,
+    ).length;
 
-  /*
-   * عدد الطلاب الذين يؤدون امتحان
-   */
-  const examCount = useMemo(
-    () =>
-      rows.filter(
-        (student) =>
-          student.activity ===
-          "exam",
-      ).length,
-    [rows],
-  );
+  const examCount =
+    rows.filter(
+      (student) =>
+        student.activity ===
+        "exam",
+    ).length;
 
-  /*
-   * عدد الطلاب الذين يشاهدون فيديو
-   */
-  const videoCount = useMemo(
-    () =>
-      rows.filter(
-        (student) =>
-          student.activity ===
-          "video",
-      ).length,
-    [rows],
-  );
+  const videoCount =
+    rows.filter(
+      (student) =>
+        student.activity ===
+        "video",
+    ).length;
 
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <Skeleton className="h-28 rounded-2xl" />
+        <Skeleton className="h-24 rounded-2xl" />
         <Skeleton className="h-96 rounded-2xl" />
       </div>
     );
@@ -398,23 +377,19 @@ function AdminStudents() {
       dir="rtl"
       className="space-y-6"
     >
-      {/* =========================
-          Live Statistics
-         ========================= */}
+      {/* الإحصائيات */}
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardContent className="flex items-center gap-3 p-4">
-            <div className="flex size-11 items-center justify-center rounded-xl bg-green-500/10 text-green-600">
-              <Circle className="size-5 fill-current" />
-            </div>
+            <Circle className="size-5 fill-green-500 text-green-500" />
 
             <div>
               <p className="text-xs text-muted-foreground">
                 متصل الآن
               </p>
 
-              <p className="text-2xl font-black">
+              <p className="text-2xl font-bold">
                 {onlineCount}
               </p>
             </div>
@@ -423,16 +398,14 @@ function AdminStudents() {
 
         <Card>
           <CardContent className="flex items-center gap-3 p-4">
-            <div className="flex size-11 items-center justify-center rounded-xl bg-blue-500/10 text-blue-600">
-              <Video className="size-5" />
-            </div>
+            <Video className="size-5 text-blue-500" />
 
             <div>
               <p className="text-xs text-muted-foreground">
                 يشاهدون فيديو
               </p>
 
-              <p className="text-2xl font-black">
+              <p className="text-2xl font-bold">
                 {videoCount}
               </p>
             </div>
@@ -441,16 +414,14 @@ function AdminStudents() {
 
         <Card>
           <CardContent className="flex items-center gap-3 p-4">
-            <div className="flex size-11 items-center justify-center rounded-xl bg-orange-500/10 text-orange-600">
-              <ClipboardCheck className="size-5" />
-            </div>
+            <ClipboardCheck className="size-5 text-orange-500" />
 
             <div>
               <p className="text-xs text-muted-foreground">
                 يؤدون امتحان
               </p>
 
-              <p className="text-2xl font-black">
+              <p className="text-2xl font-bold">
                 {examCount}
               </p>
             </div>
@@ -459,16 +430,14 @@ function AdminStudents() {
 
         <Card>
           <CardContent className="flex items-center gap-3 p-4">
-            <div className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
-              <Activity className="size-5" />
-            </div>
+            <Users className="size-5 text-primary" />
 
             <div>
               <p className="text-xs text-muted-foreground">
                 إجمالي الطلاب
               </p>
 
-              <p className="text-2xl font-black">
+              <p className="text-2xl font-bold">
                 {rows.length}
               </p>
             </div>
@@ -476,19 +445,14 @@ function AdminStudents() {
         </Card>
       </div>
 
-      {/* =========================
-          Students
-         ========================= */}
+      {/* جدول الطلاب */}
 
       <Card>
         <CardHeader className="gap-4">
-          <CardTitle className="flex items-center gap-2 text-lg">
+          <CardTitle className="flex items-center gap-2">
             <Users className="size-5 text-primary" />
-
             الطلاب ({rows.length})
           </CardTitle>
-
-          {/* Search + Filters */}
 
           <div className="flex flex-wrap gap-2">
             <div className="relative min-w-56 flex-1">
@@ -496,8 +460,8 @@ function AdminStudents() {
 
               <Input
                 value={q}
-                onChange={(e) =>
-                  setQ(e.target.value)
+                onChange={(event) =>
+                  setQ(event.target.value)
                 }
                 placeholder="ابحث بالاسم أو رقم الهاتف"
               />
@@ -505,33 +469,33 @@ function AdminStudents() {
 
             <div className="flex flex-wrap gap-1">
               <Badge
-                onClick={() =>
-                  setGrade("all")
-                }
                 className="cursor-pointer"
                 variant={
                   grade === "all"
                     ? "default"
                     : "secondary"
                 }
+                onClick={() =>
+                  setGrade("all")
+                }
               >
                 الكل
               </Badge>
 
-              {grades.map((g) => (
+              {grades.map((item) => (
                 <Badge
-                  key={g}
-                  onClick={() =>
-                    setGrade(g)
-                  }
+                  key={item}
                   className="cursor-pointer"
                   variant={
-                    grade === g
+                    grade === item
                       ? "default"
                       : "secondary"
                   }
+                  onClick={() =>
+                    setGrade(item)
+                  }
                 >
-                  {g}
+                  {item}
                 </Badge>
               ))}
             </div>
@@ -539,9 +503,9 @@ function AdminStudents() {
         </CardHeader>
 
         <CardContent className="overflow-x-auto">
-          <table className="w-full min-w-[1150px] text-sm">
+          <table className="w-full min-w-[1100px] text-sm">
             <thead className="text-muted-foreground">
-              <tr className="border-b border-border text-start">
+              <tr className="border-b">
                 <th className="p-2 text-start">
                   الطالب
                 </th>
@@ -567,7 +531,7 @@ function AdminStudents() {
                 </th>
 
                 <th className="p-2 text-start">
-                  وقت المشاهدة
+                  المشاهدة
                 </th>
 
                 <th className="p-2 text-start">
@@ -581,18 +545,16 @@ function AdminStudents() {
             </thead>
 
             <tbody>
-              {rows.map((r) => (
+              {rows.map((student) => (
                 <tr
-                  key={r.id}
-                  className="border-b border-border/60 transition-colors hover:bg-muted/40"
+                  key={student.id}
+                  className="border-b transition-colors hover:bg-muted/40"
                 >
-                  {/* =====================
-                      Student
-                     ===================== */}
+                  {/* الطالب */}
 
                   <td className="p-2">
                     <p className="font-bold">
-                      {r.full_name ||
+                      {student.full_name ||
                         "بدون اسم"}
                     </p>
 
@@ -600,59 +562,54 @@ function AdminStudents() {
                       dir="ltr"
                       className="text-xs text-muted-foreground"
                     >
-                      {r.phone || "—"}
+                      {student.phone ||
+                        "—"}
                     </p>
 
-                    {/* WhatsApp */}
-
-                    <div className="mt-2 flex flex-wrap gap-1">
-                      {r.phone ? (
+                    <div className="mt-2 flex gap-1">
+                      {student.phone ? (
                         <a
                           href={`https://wa.me/${String(
-                            r.phone,
+                            student.phone,
                           ).replace(
                             /\D/g,
                             "",
                           )}`}
                           target="_blank"
                           rel="noreferrer"
-                          className="inline-flex items-center gap-1 rounded-md bg-green-600 px-2 py-1 text-[10px] font-bold text-white transition hover:bg-green-700"
+                          className="inline-flex items-center gap-1 rounded-md bg-green-600 px-2 py-1 text-[10px] font-bold text-white"
                         >
                           <MessageCircle className="size-3" />
-
                           الطالب
                         </a>
                       ) : null}
 
-                      {r.parent_phone ? (
+                      {student.parent_phone ? (
                         <a
                           href={`https://wa.me/${String(
-                            r.parent_phone,
+                            student.parent_phone,
                           ).replace(
                             /\D/g,
                             "",
                           )}`}
                           target="_blank"
                           rel="noreferrer"
-                          className="inline-flex items-center gap-1 rounded-md bg-green-700 px-2 py-1 text-[10px] font-bold text-white transition hover:bg-green-800"
+                          className="inline-flex items-center gap-1 rounded-md bg-green-700 px-2 py-1 text-[10px] font-bold text-white"
                         >
                           <MessageCircle className="size-3" />
-
                           ولي الأمر
                         </a>
                       ) : null}
                     </div>
                   </td>
 
-                  {/* =====================
-                      Online Status
-                     ===================== */}
+                  {/* الحالة */}
 
                   <td className="p-2">
                     <div className="flex items-center gap-2">
                       <Circle
                         className={`size-3 fill-current ${
-                          r.online
+                          student.online
                             ? "text-green-500"
                             : "text-red-500"
                         }`}
@@ -660,18 +617,18 @@ function AdminStudents() {
 
                       <span
                         className={
-                          r.online
+                          student.online
                             ? "font-bold text-green-600"
                             : "text-muted-foreground"
                         }
                       >
-                        {r.online
+                        {student.online
                           ? "متصل الآن"
                           : "غير متصل"}
                       </span>
                     </div>
 
-                    {r.lastSeen ? (
+                    {student.lastSeen ? (
                       <div className="mt-1 flex items-center gap-1 text-[10px] text-muted-foreground">
                         <Clock3 className="size-3" />
 
@@ -679,7 +636,7 @@ function AdminStudents() {
 
                         <span dir="ltr">
                           {new Date(
-                            r.lastSeen,
+                            student.lastSeen,
                           ).toLocaleString(
                             "ar-EG",
                           )}
@@ -688,108 +645,83 @@ function AdminStudents() {
                     ) : null}
                   </td>
 
-                  {/* =====================
-                      Current Activity
-                     ===================== */}
+                  {/* النشاط */}
 
                   <td className="p-2">
-                    {r.activity ===
+                    {student.activity ===
                     "exam" ? (
-                      <Badge
-                        variant="destructive"
-                        className="gap-1"
-                      >
-                        <ClipboardCheck className="size-3" />
-
+                      <Badge variant="destructive">
+                        <ClipboardCheck className="me-1 size-3" />
                         أداء امتحان
                       </Badge>
-                    ) : r.activity ===
+                    ) : student.activity ===
                       "video" ? (
-                      <Badge
-                        variant="default"
-                        className="gap-1"
-                      >
-                        <Video className="size-3" />
-
+                      <Badge>
+                        <Video className="me-1 size-3" />
                         مشاهدة فيديو
                       </Badge>
-                    ) : r.activity ===
-                      "idle" &&
-                      r.online ? (
-                      <Badge
-                        variant="secondary"
-                        className="gap-1"
-                      >
-                        <Activity className="size-3" />
-
-                        نشط
+                    ) : student.activity ===
+                        "idle" &&
+                      student.online ? (
+                      <Badge variant="secondary">
+                        <Activity className="me-1 size-3" />
+                        خامل
                       </Badge>
                     ) : (
-                      <Badge
-                        variant="outline"
-                      >
+                      <Badge variant="outline">
                         غير نشط
                       </Badge>
                     )}
 
-                    {r.activityDetail ? (
-                      <p className="mt-1 max-w-44 truncate text-[10px] text-muted-foreground">
-                        {r.activityDetail}
+                    {student.detail ? (
+                      <p className="mt-1 max-w-44 truncate text-xs text-muted-foreground">
+                        {student.detail}
                       </p>
                     ) : null}
                   </td>
 
-                  {/* =====================
-                      Grade
-                     ===================== */}
+                  {/* الصف */}
 
                   <td className="p-2">
-                    {r.grade || "-"}
+                    {student.grade ||
+                      "-"}
                   </td>
 
-                  {/* =====================
-                      Courses
-                     ===================== */}
+                  {/* الكورسات */}
 
                   <td className="p-2">
-                    {r.courses}
+                    {student.courses}
                   </td>
 
-                  {/* =====================
-                      Completed Lessons
-                     ===================== */}
+                  {/* الدروس */}
 
                   <td className="p-2">
-                    {r.completed}
+                    {student.completed}
                   </td>
 
-                  {/* =====================
-                      Watch Time
-                     ===================== */}
+                  {/* المشاهدة */}
 
                   <td className="p-2">
-                    {r.watchHours} س
+                    {student.watchHours} س
                   </td>
 
-                  {/* =====================
-                      Exams
-                     ===================== */}
+                  {/* الامتحانات */}
 
                   <td className="p-2">
-                    {r.attempts}
+                    {student.attempts}
                   </td>
 
-                  {/* =====================
-                      Average
-                     ===================== */}
+                  {/* المتوسط */}
 
                   <td className="w-36 p-2">
                     <Progress
-                      value={r.avg}
+                      value={
+                        student.average
+                      }
                     />
 
                     <span className="text-xs text-muted-foreground">
-                      {r.avg}%
+                      {student.average}%
                     </span>
                   </td>
                 </tr>
@@ -807,6 +739,4 @@ function AdminStudents() {
     </div>
   );
 }
-    </Card>
-  );
 }
