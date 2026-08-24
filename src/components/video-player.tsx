@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { resolveMediaUrl } from "@/lib/media";
 
-
 type Props = {
   url: string;
   watermark: string;
@@ -10,14 +9,26 @@ type Props = {
 
 function toEmbedUrl(url: string) {
   const trimmed = url.trim();
-  const yt = trimmed.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{6,})/);
-  if (yt) return `https://www.youtube.com/embed/${yt[1]}?rel=0&modestbranding=1`;
+
+  const yt = trimmed.match(
+    /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{6,})/
+  );
+
+  if (yt) {
+    return `https://www.youtube.com/embed/${yt[1]}?rel=0&modestbranding=1`;
+  }
+
   const vimeo = trimmed.match(/vimeo\.com\/(?:video\/)?(\d+)/);
-  if (vimeo) return `https://player.vimeo.com/video/${vimeo[1]}`;
+
+  if (vimeo) {
+    return `https://player.vimeo.com/video/${vimeo[1]}`;
+  }
+
   return trimmed;
 }
 
-const isDirectFile = (url: string) => /\.(mp4|webm|ogg|m3u8)(\?|$)/i.test(url);
+const isDirectFile = (url: string) =>
+  /\.(mp4|webm|ogg|m3u8)(\?|$)/i.test(url);
 
 export function VideoPlayer({ url, watermark, onHeartbeat }: Props) {
   const [seconds, setSeconds] = useState(0);
@@ -26,9 +37,13 @@ export function VideoPlayer({ url, watermark, onHeartbeat }: Props) {
 
   useEffect(() => {
     let active = true;
+
     void resolveMediaUrl(url).then((u) => {
-      if (active) setResolved(u);
+      if (active) {
+        setResolved(u);
+      }
     });
+
     return () => {
       active = false;
     };
@@ -42,20 +57,23 @@ export function VideoPlayer({ url, watermark, onHeartbeat }: Props) {
         return next;
       });
     }, 15000);
+
     return () => {
-      if (timer.current) clearInterval(timer.current);
+      if (timer.current) {
+        clearInterval(timer.current);
+      }
     };
   }, [onHeartbeat]);
 
   if (!resolved) {
     return (
       <div className="flex aspect-video items-center justify-center rounded-2xl bg-muted text-muted-foreground">
-        {url ? "جاري تجهيز الفيديو..." : "لم يتم رفع فيديو لهذا الدرس بعد"}
+        {url
+          ? "جاري تجهيز الفيديو..."
+          : "لم يتم رفع فيديو لهذا الدرس بعد"}
       </div>
     );
   }
-
-
 
   return (
     <div className="relative aspect-video overflow-hidden rounded-2xl bg-black shadow-soft">
@@ -70,7 +88,6 @@ export function VideoPlayer({ url, watermark, onHeartbeat }: Props) {
       ) : (
         <iframe
           src={toEmbedUrl(resolved)}
-
           title="مشغل الدرس"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; picture-in-picture; fullscreen"
           allowFullScreen
@@ -78,11 +95,12 @@ export function VideoPlayer({ url, watermark, onHeartbeat }: Props) {
         />
       )}
 
-    {/* Watermark الطالب - يتحرك داخل الفيديو */}
-<div className="pointer-events-none absolute inset-0 z-20 overflow-hidden select-none">
-  <span className="student-watermark absolute whitespace-nowrap text-[10px] font-bold text-red-500/55">
-    {watermark}
-  </span>
-</div>
+      {/* Watermark الطالب */}
+      <div className="pointer-events-none absolute inset-0 z-20 overflow-hidden select-none">
+        <span className="student-watermark absolute whitespace-nowrap text-[10px] font-bold text-red-500/60">
+          {watermark}
+        </span>
+      </div>
+    </div>
   );
 }
