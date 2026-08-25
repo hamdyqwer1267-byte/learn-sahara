@@ -14,12 +14,24 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 
 export const Route = createFileRoute("/_authenticated/quiz/$quizId")({
+  validateSearch: (
+    search: Record<string, unknown>,
+  ) => ({
+    mode:
+      search.mode === "homework"
+        ? "homework"
+        : "exam",
+  }),
   head: () => ({
     meta: [
-      { title: "الامتحان الإلكتروني | خليك علومنجي" },
+      {
+  title: "الامتحان أو الواجب الإلكتروني | خليك علومنجي",
+},
+      
       {
         name: "description",
-        content: "امتحان بمؤقت زمني وتصحيح فوري ومراجعة تفصيلية للإجابات.",
+       content:
+  "امتحان أو واجب إلكتروني بتصحيح فوري.",
       },
       { property: "og:title", content: "الامتحان الإلكتروني" },
       {
@@ -48,6 +60,9 @@ type Result = {
 
 function QuizPage() {
   const { quizId } = Route.useParams();
+  const { mode } = Route.useSearch();
+
+const isHomework = mode === "homework";
   const { user } = useAuth();
 
   const [started, setStarted] = useState(false);
