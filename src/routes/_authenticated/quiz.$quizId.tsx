@@ -14,22 +14,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 
 export const Route = createFileRoute("/_authenticated/quiz/$quizId")({
-  validateSearch: (
-    search: Record<string, unknown>,
-  ) => ({
-    mode:
-      search.mode === "homework"
-        ? "homework"
-        : "exam",
-  }),
-  validateSearch: (
-    search: Record<string, unknown>,
-  ) => ({
-    mode:
-      search.mode === "homework"
-        ? "homework"
-        : "exam",
-  }),
+ validateSearch: (
+  search: Record<string, unknown>,
+) => ({
+  mode:
+    search.mode === "homework"
+      ? "homework"
+      : "exam",
+}),
   head: () => ({
     meta: [
       {
