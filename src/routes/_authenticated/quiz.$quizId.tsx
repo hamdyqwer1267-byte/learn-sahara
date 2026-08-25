@@ -63,9 +63,7 @@ function QuizPage() {
   const { mode } = Route.useSearch();
 
 const isHomework = mode === "homework";
-  const { mode } = Route.useSearch();
 
-const isHomework = mode === "homework";
   const { user } = useAuth();
 
   const [started, setStarted] = useState(false);
