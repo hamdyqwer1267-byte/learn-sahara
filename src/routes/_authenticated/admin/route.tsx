@@ -7,8 +7,9 @@ import {
 
 import {
   BookOpen,
-  ClipboardList,
-  MessageCircle,
+ClipboardList,
+ClipboardCheck,
+MessageCircle,
   ShieldCheck,
   Ticket,
   Users,
@@ -33,6 +34,11 @@ const NAV = [
     label: "الامتحانات",
     icon: ClipboardList,
   },
+  {
+  to: "/admin/homework",
+  label: "الواجبات",
+  icon: ClipboardCheck,
+},
   {
     to: "/admin/students",
     label: "الطلاب",
