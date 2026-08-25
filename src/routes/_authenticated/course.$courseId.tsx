@@ -74,15 +74,22 @@ function CoursePage() {
   const completedIds = new Set(data.progress.filter((p) => p.completed).map((p) => p.lesson_id));
   const allLessons = data.units.flatMap((u) => u.lessons ?? []);
   const pct = allLessons.length
-    const exams = data.quizzes.filter(
+  ? Math.round(
+      (allLessons.filter((l) =>
+        completedIds.has(l.id),
+      ).length /
+        allLessons.length) *
+        100,
+    )
+  : 0;
+
+const exams = data.quizzes.filter(
   (q) => !q.is_homework,
 );
 
 const homework = data.quizzes.filter(
   (q) => q.is_homework,
 );
-    ? Math.round((allLessons.filter((l) => completedIds.has(l.id)).length / allLessons.length) * 100)
-    : 0;
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-10">
@@ -173,7 +180,7 @@ const homework = data.quizzes.filter(
 
       <h2 className="mt-10 text-2xl font-black">امتحانات الكورس</h2>
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
-        {data.quizzes.map((q) => (
+        {exams.map((q) => (
           <Card key={q.id}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
@@ -198,7 +205,7 @@ const homework = data.quizzes.filter(
             </CardContent>
           </Card>
         ))}
-        {data.quizzes.length === 0 ? (
+        {exams.length === 0 ? (
           <p className="text-muted-foreground">
             <FileText className="ms-1 inline size-4" /> لا توجد امتحانات متاحة حاليًا.
           </p>
