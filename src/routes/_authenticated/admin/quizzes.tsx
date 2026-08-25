@@ -57,10 +57,15 @@ function AdminQuizzes() {
   passing_grade: Number(f.get("passing_grade") ?? 50),
   is_homework: false,
 });
-    if (error) {
-      toast.error("تعذّر إنشاء الامتحان");
-      return;
-    }
+  if (error) {
+  console.error("CREATE QUIZ ERROR:", error);
+
+  toast.error(
+    `تعذّر إنشاء الامتحان: ${error.message}`,
+  );
+
+  return;
+}
     (e.target as HTMLFormElement).reset();
     toast.success("تم إنشاء الامتحان");
     await refresh();
