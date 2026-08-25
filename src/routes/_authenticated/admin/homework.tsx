@@ -79,10 +79,18 @@ function AdminHomework() {
         is_homework: true,
       });
 
-    if (error) {
-      toast.error("تعذّر إنشاء الواجب");
-      return;
-    }
+   if (error) {
+  console.error(
+    "CREATE HOMEWORK ERROR:",
+    error,
+  );
+
+  toast.error(
+    `تعذّر إنشاء الواجب: ${error.message}`,
+  );
+
+  return;
+}
 
     e.currentTarget.reset();
 
