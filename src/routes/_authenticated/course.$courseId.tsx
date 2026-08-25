@@ -38,7 +38,13 @@ function CoursePage() {
           .order("position"),
         supabase.from("enrollments").select("id").eq("course_id", courseId).maybeSingle(),
         supabase.from("lesson_progress").select("lesson_id,completed"),
-        supabase.from("quizzes").select("id,title,time_limit_minutes,passing_grade,lesson_id").eq("course_id", courseId),
+        supabase
+  .from("quizzes")
+  .select(
+    "id,title,time_limit_minutes,passing_grade,lesson_id,is_homework",
+  )
+  .eq("course_id", courseId),
+ 
       ]);
       if (course.error) throw course.error;
       return {
@@ -68,6 +74,13 @@ function CoursePage() {
   const completedIds = new Set(data.progress.filter((p) => p.completed).map((p) => p.lesson_id));
   const allLessons = data.units.flatMap((u) => u.lessons ?? []);
   const pct = allLessons.length
+    const exams = data.quizzes.filter(
+  (q) => !q.is_homework,
+);
+
+const homework = data.quizzes.filter(
+  (q) => q.is_homework,
+);
     ? Math.round((allLessons.filter((l) => completedIds.has(l.id)).length / allLessons.length) * 100)
     : 0;
 
