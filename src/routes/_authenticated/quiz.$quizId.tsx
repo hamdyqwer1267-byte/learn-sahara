@@ -493,6 +493,83 @@ const isHomework = mode === "homework";
   const answeredCount = Object.keys(answers).length;
 
   if (result) {
+    {isHomework ? (
+  <div className="mt-6 space-y-4 text-right">
+    <h2 className="text-2xl font-black">
+      مراجعة إجابات الواجب
+    </h2>
+
+    {questions.map((q, index) => {
+      const studentAnswer = answers[q.id];
+
+      const isCorrect =
+        studentAnswer === q.correct_index;
+
+      return (
+        <Card
+          key={q.id}
+          className={
+            isCorrect
+              ? "border-success/40"
+              : "border-destructive/40"
+          }
+        >
+          <CardHeader>
+            <CardTitle className="text-base">
+              السؤال {index + 1}
+            </CardTitle>
+
+            <p className="font-bold">
+              {q.text}
+            </p>
+          </CardHeader>
+
+          <CardContent className="space-y-3">
+            <div
+              className={`rounded-xl p-3 ${
+                isCorrect
+                  ? "bg-success/10"
+                  : "bg-destructive/10"
+              }`}
+            >
+              <p className="text-sm font-bold">
+                إجابتك:
+              </p>
+
+              <p className="mt-1">
+                {studentAnswer !== undefined
+                  ? q.options[studentAnswer]
+                  : "لم تختر إجابة"}
+              </p>
+            </div>
+
+            <div className="rounded-xl bg-success/10 p-3">
+              <p className="text-sm font-bold">
+                الإجابة الصحيحة:
+              </p>
+
+              <p className="mt-1">
+                {q.options[q.correct_index]}
+              </p>
+            </div>
+
+            <Badge
+              className={
+                isCorrect
+                  ? "bg-success text-success-foreground"
+                  : "bg-destructive text-destructive-foreground"
+              }
+            >
+              {isCorrect
+                ? "إجابة صحيحة ✓"
+                : "إجابة خاطئة ✗"}
+            </Badge>
+          </CardContent>
+        </Card>
+      );
+    })}
+  </div>
+) : null}
     return (
       <main className="mx-auto max-w-3xl px-4 py-10">
         {forcedMessage ? (
