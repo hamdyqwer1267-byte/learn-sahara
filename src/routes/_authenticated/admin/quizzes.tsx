@@ -32,12 +32,17 @@ function AdminQuizzes() {
     queryFn: async () => (await supabase.from("courses").select("id,title").order("title")).data ?? [],
   });
 
-  const { data: quizzes } = useQuery({
-    queryKey: ["admin-quizzes"],
-    queryFn: async () =>
-      (await supabase.from("quizzes").select("*, questions(id,text,options,correct_index,position)").order("created_at"))
-        .data ?? [],
-  });
+ const { data: quizzes } = useQuery({
+  queryKey: ["admin-quizzes"],
+  queryFn: async () =>
+    (
+      await supabase
+        .from("quizzes")
+        .select("*, questions(id,text,options,correct_index,position)")
+        .eq("is_homework", false)
+        .order("created_at")
+    ).data ?? [],
+});
 
   const refresh = () => queryClient.invalidateQueries();
 
@@ -45,12 +50,13 @@ function AdminQuizzes() {
     e.preventDefault();
     const f = new FormData(e.currentTarget);
     const { error } = await supabase.from("quizzes").insert({
-      course_id: String(f.get("course_id") ?? ""),
-      title: String(f.get("title") ?? ""),
-      description: String(f.get("description") ?? ""),
-      time_limit_minutes: Number(f.get("time_limit_minutes") ?? 15),
-      passing_grade: Number(f.get("passing_grade") ?? 50),
-    });
+  course_id: String(f.get("course_id") ?? ""),
+  title: String(f.get("title") ?? ""),
+  description: String(f.get("description") ?? ""),
+  time_limit_minutes: Number(f.get("time_limit_minutes") ?? 15),
+  passing_grade: Number(f.get("passing_grade") ?? 50),
+  is_homework: false,
+});
     if (error) {
       toast.error("تعذّر إنشاء الامتحان");
       return;
