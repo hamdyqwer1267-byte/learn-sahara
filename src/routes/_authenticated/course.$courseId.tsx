@@ -73,7 +73,7 @@ function CoursePage() {
   const enrolled = data.enrolled || isAdmin;
   const completedIds = new Set(data.progress.filter((p) => p.completed).map((p) => p.lesson_id));
   const allLessons = data.units.flatMap((u) => u.lessons ?? []);
-  const pct = allLessons.length
+ const pct = allLessons.length
   ? Math.round(
       (allLessons.filter((l) =>
         completedIds.has(l.id),
@@ -211,6 +211,57 @@ const homework = data.quizzes.filter(
           </p>
         ) : null}
       </div>
+      <h2 className="mt-10 text-2xl font-black">
+  واجبات الكورس
+</h2>
+
+<div className="mt-4 grid gap-4 sm:grid-cols-2">
+  {homework.map((q) => (
+    <Card key={q.id}>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-lg">
+          <ClipboardList className="size-5 text-primary" />
+          {q.title}
+        </CardTitle>
+      </CardHeader>
+
+      <CardContent className="space-y-3">
+        <p className="text-sm text-muted-foreground">
+          المدة: {q.time_limit_minutes} دقيقة • درجة النجاح:{" "}
+          {q.passing_grade}%
+        </p>
+
+        {enrolled ? (
+          <Button asChild className="w-full">
+            <Link
+              to="/quiz/$quizId"
+              params={{ quizId: q.id }}
+              search={{ mode: "homework" }}
+            >
+              ابدأ الواجب
+            </Link>
+          </Button>
+        ) : (
+          <Button
+            className="w-full"
+            variant="outline"
+            disabled
+          >
+            <Lock className="size-4" />
+            فعّل الكورس أولاً
+          </Button>
+        )}
+      </CardContent>
+    </Card>
+  ))}
+
+  {homework.length === 0 ? (
+    <p className="text-muted-foreground">
+      <FileText className="ms-1 inline size-4" />
+      لا توجد واجبات متاحة حاليًا.
+    </p>
+  ) : null}
+</div>
     </main>
   );
 }
