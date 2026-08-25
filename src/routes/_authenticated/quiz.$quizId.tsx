@@ -22,6 +22,14 @@ export const Route = createFileRoute("/_authenticated/quiz/$quizId")({
         ? "homework"
         : "exam",
   }),
+  validateSearch: (
+    search: Record<string, unknown>,
+  ) => ({
+    mode:
+      search.mode === "homework"
+        ? "homework"
+        : "exam",
+  }),
   head: () => ({
     meta: [
       {
@@ -60,6 +68,9 @@ type Result = {
 
 function QuizPage() {
   const { quizId } = Route.useParams();
+  const { mode } = Route.useSearch();
+
+const isHomework = mode === "homework";
   const { mode } = Route.useSearch();
 
 const isHomework = mode === "homework";
